@@ -56,8 +56,8 @@ class RFID_dataloader_v2:
         #print(self.ptime)
         print('Finish RFID data loading')
         print('Start time: %.4f, stop time: %.4f' % (self.ptime[0][0][0],self.ptime[0][0][-1]))
-        print(self.phase)
-        print(self.rssi)
+        # print(self.phase)
+        # print(self.rssi)
     def get_data(self, time_temp): ## get ONE data 
         T_polyfit = 0
         T_valid = 0.2
@@ -65,12 +65,12 @@ class RFID_dataloader_v2:
         self.phase_fit = []
         self.rssi_fit = []
 
-        self.a_1_idx = self.antenna_list.index('25')
-        self.a_2_idx = self.antenna_list.index('26')
-        self.a_3_idx = self.antenna_list.index('27')
-        self.a_4_idx = self.antenna_list.index('28')
-        self.a_5_idx = self.antenna_list.index('29')
-        self.a_6_idx = self.antenna_list.index('30')
+        self.a_1_idx = self.antenna_list.index('1')
+        self.a_2_idx = self.antenna_list.index('2')
+        self.a_3_idx = self.antenna_list.index('3')
+        self.a_4_idx = self.antenna_list.index('4')
+        self.a_5_idx = self.antenna_list.index('5')
+        self.a_6_idx = self.antenna_list.index('6')
 
         # phase polynomial regression
         for i, antenna in enumerate(self.antenna_list):

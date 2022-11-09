@@ -11,7 +11,7 @@ import numpy as np
 from utils.basic import *
 
 class cv_dataloader:
-    def __init__(self, box_filename, box_list_wanted = ['0 ', '1 ','2 ']):#rfid_list_wanted = ['E280 1160 6000 0209 F811 7224'] #  ['E280 1160 6000 0209 F811 7224']['E280 6894 0000 500E 73D4 548C']
+    def __init__(self, box_filename, box_list_wanted = ['0 ', '1 ','2 ', '-1 ']):#rfid_list_wanted = ['E280 1160 6000 0209 F811 7224'] #  ['E280 1160 6000 0209 F811 7224']['E280 6894 0000 500E 73D4 548C']
         ## cv distance ##
         # [Timestamp	frame	id	block	distance	cx	cy	left	top	 w	h	coor_x	coor_y	coor_z] #
         self.box_ids = []
@@ -20,11 +20,11 @@ class cv_dataloader:
             f_csv = csv.reader(f)
             headers = next(f_csv)
             for row in f_csv:
-                if row[4] != 'nan ' and  row[4] != 'inf ' and row[2] in box_list_wanted:
+                if row[4] != 'nan ' and  row[4] != 'inf ':# and row[2] in box_list_wanted:
                     if row[2] not in self.box_ids:
                         self.box_ids.append(row[2])
                         self.box_data.append([])
-                    self.box_data[self.box_ids.index(row[2])].append([row[0],row[1],row[3],row[4],row[11],row[12],row[13]])
+                    self.box_data[self.box_ids.index(row[2])].append([row[0],row[1],row[3],row[4],row[5],row[11],row[12],row[13]])
             f.close()
         print(self.box_ids)
         
@@ -37,14 +37,17 @@ class cv_dataloader:
         self.cz = [[] for i in self.box_ids]
         self.ctan = [[] for i in self.box_ids]
         self.cdis = [[] for i in self.box_ids]
+        self.cu = [[] for i in self.box_ids]
         for k, person in enumerate(self.box_ids):
             self.ctime[k] = np.array([float(i[0]) for i in self.box_data[self.box_ids.index(person)] if i[-2] != 'nan '])
             self.c_x_temp = np.array([eval(i[-3]) for i in self.box_data[self.box_ids.index(person)] if i[-2] != 'nan ']) - 0
             self.c_z_temp = np.array([eval(i[-1]) for i in self.box_data[self.box_ids.index(person)] if i[-2] != 'nan ']) + 0.08
             self.ctan[k] = [self.c_x_temp[i]/self.c_z_temp[i] for i in range(len(self.c_x_temp))]
             self.cdis[k] = np.array([eval(i[3]) for i in self.box_data[self.box_ids.index(person)] if i[-2] != 'nan '])
+            self.cu[k] = np.array([eval(i[4]) for i in self.box_data[self.box_ids.index(person)] if i[-2] != 'nan '])
             self.cx[k] =  self.c_x_temp * 1
             self.cz[k] =  self.c_z_temp * 1
+
         self.count = -1
         print('Finish CV data loading')
         print('Start time: %.4f, stop time: %.4f' % (self.ctime[0][0],self.ctime[0][-1]))
@@ -71,10 +74,23 @@ class cv_dataloader:
                 self.cdis_fit[j].append(Linear_fitting_2pnts(self.ctime[j][idx_f_i], self.ctime[j][idx_l_i], self.cdis[j][idx_f_i], self.cdis[j][idx_l_i], time_temp))
             self.c_aoa_fit[j].append(np.arccos(self.cx_fit[j][-1]/(self.cz_fit[j][-1] ** 2 + self.cx_fit[j][-1] ** 2) ** 0.5))
 
-        return self.box_ids, np.array(self.c_aoa_fit) / np.pi , ptime_fit
+        return self.box_ids, np.array(self.c_aoa_fit) / np.pi 
     def get_time_for_frame(self, frame_idx):
         self.count += 1
-        return self.ctime[0][frame_idx]
+        if frame_idx >= len(self.ctime[0]):
+            return self.ctime[0][-1]
+        else:
+            return self.ctime[0][frame_idx]
+    def get_tan_for_frame(self, frame_idx):
+        if frame_idx >= len(self.ctan[0]):
+            return self.ctan[0][-1]
+        else:
+            return self.ctan[0][frame_idx]
+    def get_cu_for_frame(self, frame_idx):
+        if frame_idx >= len(self.cu[0]):
+            return self.cu[0][-1]
+        else:
+            return self.cu[0][frame_idx]
 if __name__ == '__main__':
     cv_data = cv_dataloader('/home/zihaow/Experiments/Experi13/Data/1.csv')
     ids, data,_ = cv_data.get_data(1655539017.9640)

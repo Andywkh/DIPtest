@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 # for dynamic graphing
 from IPython import display
 
-from AOA_Calculations.sixRubberAntenna import *
+# from AOA_Calculations.sixRubberAntenna1ppl import *
 
 # Function for drawing of graph for AoA
 def graph_plotting_per_unit_timefunction(calculatedAOA, time_value):
